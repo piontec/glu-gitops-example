@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: example-app-staging
+  name: example-app-production
   labels:
-    app: app-staging
+    app: app-production
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: app-staging
+      app: app-production
   template:
     metadata:
       labels:
-        app: app-staging
+        app: app-production
     spec:
       containers:
       - name: container
@@ -21,7 +21,7 @@ spec:
         - containerPort: 8080
         env:
         - name: APP_ENVIRONMENT
-          value: "staging"
+          value: "production"
         - name: APP_IMAGE_DIGEST
           value: "unknown"
 

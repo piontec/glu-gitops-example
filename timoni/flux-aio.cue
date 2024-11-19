@@ -30,5 +30,20 @@ bundle: {
 				}
 			}
 		}
+		"production": {
+			module: url: "oci://ghcr.io/stefanprodan/modules/flux-git-sync"
+			namespace: "flux-system"
+			values: {
+				git: {
+					url:  "https://github.com/get-glu/gitops-example"
+					ref:  "refs/heads/main"
+					path: "./env/production"
+				}
+				sync: {
+					targetNamespace: "default"
+					wait:            true
+				}
+			}
+		}
 	}
 }
