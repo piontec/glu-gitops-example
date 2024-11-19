@@ -1,26 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: example-app-staging
+  creationTimestamp: null
   labels:
     app: app-staging
+  name: example-app-staging
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: app-staging
+  strategy: {}
   template:
     metadata:
+      creationTimestamp: null
       labels:
         app: app-staging
     spec:
       containers:
-      - name: container
-        image: "ghcr.io/get-glu/gitops-example/app:latest@sha256:e45af70591e3cb95e8d3b90f2b9807bc9f7a948c23094b38361f362d1dfb24ab"
+      - env:
+        - name: APP_ENVIRONMENT
+          value: staging
+        - name: APP_IMAGE_DIGEST
+          value: sha256:e45af70591e3cb95e8d3b90f2b9807bc9f7a948c23094b38361f362d1dfb24ab
+        image: ghcr.io/get-glu/gitops-example/app@sha256:3f8892d6251124aa0a9b7bc1603df8cd6cde8746a8fdb7dd7f7c54c3b83f0c10
+        name: container
         ports:
         - containerPort: 8080
-        env:
-        - name: APP_ENVIRONMENT
-          value: "staging"
-        - name: APP_IMAGE_DIGEST
-          value: "sha256:e45af70591e3cb95e8d3b90f2b9807bc9f7a948c23094b38361f362d1dfb24ab"
+        resources: {}
+status: {}
