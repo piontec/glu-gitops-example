@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-deployment
+  name: example-app-staging
   labels:
-    app: nginx
+    app: app-staging
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: nginx
+      app: app-staging
   template:
     metadata:
       labels:
-        app: nginx
+        app: app-staging
     spec:
       containers:
-      - name: nginx
-        image: nginx:1.14.2
+      - name: container
+        image: ghcr.io/get-glu/gitops-example/app:latest
         ports:
-        - containerPort: 80
+        - containerPort: 8080
