@@ -10,8 +10,10 @@ apiVersion: kind.x-k8s.io/v1alpha4
 name: glu-gitops-example
 nodes:
 - extraPortMappings:
-  - containerPort: 30080 # example application
-    hostPort: 30080
+  - containerPort: 30081 # app in staging
+    hostPort: 30081
+  - containerPort: 30082 # app in production
+    hostPort: 30082
   
 EOF
 
