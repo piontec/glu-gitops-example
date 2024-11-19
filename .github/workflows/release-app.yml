@@ -29,4 +29,5 @@ jobs:
         with:
           context: ./cmd/app
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ghcr.io/get-glu/gitops-example/app:latest
