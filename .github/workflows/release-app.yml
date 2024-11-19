@@ -2,6 +2,8 @@ name: ci
 
 on:
   push:
+    branches:
+    - "main"
 
 jobs:
   docker:
@@ -17,7 +19,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ github.actore }}
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v6
