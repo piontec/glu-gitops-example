@@ -24,4 +24,3 @@ spec:
           value: "staging"
         - name: APP_IMAGE_DIGEST
           value: "sha256:e45af70591e3cb95e8d3b90f2b9807bc9f7a948c23094b38361f362d1dfb24ab"
-
