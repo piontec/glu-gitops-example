@@ -29,6 +29,6 @@ jobs:
         with:
           context: .
           push: true
-          file: "{context}/cmd/app/Dockfile"
+          file: "cmd/app/Dockfile"
           platforms: linux/amd64,linux/arm64
           tags: ghcr.io/get-glu/gitops-example/app:latest
