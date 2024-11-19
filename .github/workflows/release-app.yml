@@ -8,6 +8,7 @@ on:
 jobs:
   docker:
     permissions:
+      contents: read
       packages: write
     runs-on: ubuntu-latest
     steps:
@@ -28,4 +29,4 @@ jobs:
         with:
           context: ./cmd/app
           push: true
-          tags: get-glu/gitops-example/app:latest
+          tags: ghcr.io/get-glu/gitops-example/app:latest
