@@ -1,4 +1,6 @@
 bundle: {
+	_pass: string @timoni(runtime:string:CONFIGURATION_REPOSITORY_PASSWORD)
+
 	apiVersion: "v1alpha1"
 	name:       "flux-aio"
 	instances: {
@@ -43,6 +45,14 @@ bundle: {
 					targetNamespace: "default"
 					wait:            true
 				}
+			}
+		}
+		"pipeline": {
+			module: url: "file://pipeline"
+			namespace: "glu"
+			values: {
+				image: pullPolicy:  "Always"
+				pipeline: password: _pass
 			}
 		}
 	}
