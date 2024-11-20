@@ -1,0 +1,9 @@
+sources:
+  git:
+    gitopsexample:
+      remote:
+        name: origin
+        url: "https://github.com/get-glu/gitops-example.git"
+  oci:
+    app:
+      reference: "ghcr.io/get-glu/gitops-example/app:latest"
