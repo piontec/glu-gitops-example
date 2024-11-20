@@ -4,6 +4,13 @@ sources:
       remote:
         name: origin
         url: "https://github.com/get-glu/gitops-example.git"
+        credential: github
   oci:
     app:
       reference: "ghcr.io/get-glu/gitops-example/app:latest"
+
+credentials:
+  github:
+    type: basic
+    basic:
+      username: glu
