@@ -161,6 +161,12 @@ func (c *AppResource) WriteTo(ctx context.Context, meta glu.Metadata, fs fs.File
 
 	if containers := deployment.Spec.Template.Spec.Containers; len(containers) > 0 {
 		containers[0].Image = fmt.Sprintf("%s@%s", c.Image, c.ImageDigest)
+
+		for i := range containers[0].Env {
+			if containers[0].Env[i].Name == "APP_IMAGE_DIGEST" {
+				containers[0].Env[i].Value = c.ImageDigest
+			}
+		}
 	}
 
 	fi, err := fs.OpenFile(
