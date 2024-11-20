@@ -2,8 +2,8 @@ FROM golang:1.23
 
 ADD . .
 
-WORKDIR cmd/app
+WORKDIR cmd/pipeline
 
-RUN sh -c 'go build -o /bin/pipeline ./cmd/pipeline/.'
+RUN sh -c 'go build -o /bin/pipeline .'
 
 CMD "/bin/pipeline"

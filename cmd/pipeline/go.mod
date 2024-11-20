@@ -3,7 +3,7 @@ module get-glu/gitops-example/pipeline
 go 1.23.3
 
 require (
-	github.com/get-glu/glu v0.0.1-prerelease2
+	github.com/get-glu/glu v0.0.1-prerelease2.0.20241120131841-e88e710e168b
 	github.com/get-glu/glu/ui v0.0.1-prerelease2
 	github.com/opencontainers/image-spec v1.1.0
 	k8s.io/api v0.31.2
@@ -62,7 +62,3 @@ require (
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect
 )
-
-replace github.com/get-glu/glu => ../../../../flipt-io/glu
-
-replace github.com/get-glu/glu/ui => ../../../../flipt-io/glu/ui
