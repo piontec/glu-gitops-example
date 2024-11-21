@@ -19,6 +19,10 @@ Read more below for the necessary dependencies needed to boostrap and run this e
 - [Kind](https://kind.sigs.k8s.io/)
 - [Go](https://go.dev/)
 
+> The start script below will also install [Timoni](https://timoni.sh/) (using `go install` to do so).
+> This is used to configure our Kind cluster.
+> Big love to Timoni :heart:.
+
 ## Running
 
 Before you get started you're going to want to do the following:
