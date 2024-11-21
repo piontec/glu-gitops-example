@@ -22,8 +22,8 @@ spec:
         - name: APP_ENVIRONMENT
           value: staging
         - name: APP_IMAGE_DIGEST
-          value: sha256:180dea3f897f4fcbb098f04b4664b67e6550e91c984e7aff8001c7eacd657855
-        image: ghcr.io/get-glu/gitops-example/app@sha256:180dea3f897f4fcbb098f04b4664b67e6550e91c984e7aff8001c7eacd657855
+          value: sha256:d0ae5e10d27115a8bd245f989377c5eca2f74878b8a65bc4db21fd096551f802
+        image: ghcr.io/get-glu/gitops-example/app@sha256:d0ae5e10d27115a8bd245f989377c5eca2f74878b8a65bc4db21fd096551f802
         name: container
         ports:
         - containerPort: 8080
