@@ -1,5 +1,6 @@
 bundle: {
-	_pass: string @timoni(runtime:string:CONFIGURATION_REPOSITORY_PASSWORD)
+	_repo: string | *"https://github.com/get-glu/gitops-example" @timoni(runtime:string:CONFIGURATION_REPOSITORY_URL)
+	_pass: string                                                @timoni(runtime:string:CONFIGURATION_REPOSITORY_PASSWORD)
 
 	apiVersion: "v1alpha1"
 	name:       "flux-aio"
@@ -22,7 +23,7 @@ bundle: {
 			namespace: "flux-system"
 			values: {
 				git: {
-					url:  "https://github.com/get-glu/gitops-example"
+					url:  _repo
 					ref:  "refs/heads/main"
 					path: "./env/staging"
 				}
@@ -37,7 +38,7 @@ bundle: {
 			namespace: "flux-system"
 			values: {
 				git: {
-					url:  "https://github.com/get-glu/gitops-example"
+					url:  _repo
 					ref:  "refs/heads/main"
 					path: "./env/production"
 				}

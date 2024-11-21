@@ -33,6 +33,10 @@ import (
 								value: "DEBUG"
 							},
 							{
+								name:  "GLU_SOURCES_GIT_GITOPSEXAMPLE_REMOTE_URL"
+								value: "\(#config.pipeline.url).git"
+							},
+							{
 								name: "GLU_CREDENTIALS_GITHUB_BASIC_PASSWORD"
 								valueFrom: secretKeyRef: {
 									name: #config.metadata.name

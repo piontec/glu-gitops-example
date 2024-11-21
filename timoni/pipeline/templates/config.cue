@@ -83,7 +83,10 @@ import (
 	affinity?: corev1.#Affinity
 	topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
 
-	pipeline: password: string
+	pipeline: {
+		url:      string | *"https://github.com/get-glu/gitops-example"
+		password: string
+	}
 
 	// Test Job disabled by default.
 	test: {

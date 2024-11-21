@@ -1,6 +1,9 @@
 #!/bin/sh
 
-set -x
+read -p "Enter your target gitops repo URL [default: https://github.com/get-glu/gitops-example]: " repository
+repository="${repository:-https://github.com/get-glu/gitops-example.git}"
+
+read -p "Enter your GitHub personal access token [default: <empty> (read-only pipeline)]: " token
 
 kind create cluster \
   --wait 120s \
@@ -28,4 +31,5 @@ if ! command -v timoni 2>&1 >/dev/null; then
   go install github.com/stefanprodan/timoni/cmd/timoni@latest
 fi
 
-timoni bundle apply --kube-context kind-glu-gitops-example -f timoni/flux-aio.cue --runtime-from-env
+CONFIGURATION_REPOSITORY_PASSWORD="${token}" \
+  timoni bundle apply --kube-context kind-glu-gitops-example -f timoni/flux-aio.cue --runtime-from-env

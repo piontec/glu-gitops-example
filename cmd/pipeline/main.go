@@ -64,7 +64,7 @@ func run(ctx context.Context) error {
 
 			// build a phase for the staging environment which source from the git repository
 			// configure it to promote from the OCI phase
-			staging, err := phases.New(glu.Name("staging"),
+			staging, err := phases.New(glu.Name("staging", glu.Label("url", "http://0.0.0.0:30081")),
 				pipeline, gitSource, core.PromotesFrom(ociPhase))
 			if err != nil {
 				return nil, err
@@ -72,7 +72,7 @@ func run(ctx context.Context) error {
 
 			// build a phase for the production environment which source from the git repository
 			// configure it to promote from the staging git phase
-			_, err = phases.New(glu.Name("production"),
+			_, err = phases.New(glu.Name("production", glu.Label("url", "http://0.0.0.0:30082")),
 				pipeline, gitSource, core.PromotesFrom(staging))
 			if err != nil {
 				return nil, err
