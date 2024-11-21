@@ -52,8 +52,11 @@ bundle: {
 			module: url: "file://pipeline"
 			namespace: "glu"
 			values: {
-				image: pullPolicy:  "Always"
-				pipeline: password: _pass
+				image: pullPolicy: "Always"
+				pipeline: {
+					url:      _repo
+					password: _pass
+				}
 			}
 		}
 	}
