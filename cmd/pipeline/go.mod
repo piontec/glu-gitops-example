@@ -3,8 +3,8 @@ module get-glu/gitops-example/pipeline
 go 1.23.3
 
 require (
-	github.com/get-glu/glu v0.0.1-prerelease4
-	github.com/get-glu/glu/ui v0.0.1-prerelease4
+	github.com/get-glu/glu v0.0.1-prerelease5
+	github.com/get-glu/glu/ui v0.0.1-prerelease5
 	github.com/opencontainers/image-spec v1.1.0
 	k8s.io/api v0.31.2
 	k8s.io/apimachinery v0.31.2
