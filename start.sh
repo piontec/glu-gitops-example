@@ -2,21 +2,9 @@
 
 set -eo pipefail
 
-read -p "Enter your target gitops repo URL [default: https://github.com/get-glu/gitops-example]: " repository
-repository="${repository:-https://github.com/get-glu/gitops-example}"
-repository="${repository%.git}"
-
-if kubectl -n glu get secret pipeline 2>&1 >/dev/null; then
-  token="$(kubectl -n glu get secret pipeline -o jsonpath='{.data.github_password}' | base64 -d)"
-else
-  read -s -p "Enter your GitHub personal access token [default: <empty> (read-only pipeline)]: " token
-  echo ""
-  echo "Creating cluster..."
-fi
-
 kind create cluster \
   --wait 120s \
-  --config - <<EOF || echo "Cluster already exists"
+  --config - <<EOF 2>/dev/null || echo "Cluster already exists"
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 name: glu-gitops-example
@@ -38,6 +26,20 @@ fi
 
 if ! command -v timoni 2>&1 >/dev/null; then
   go install github.com/stefanprodan/timoni/cmd/timoni@latest
+fi
+
+echo ""
+
+read -p "Enter your target gitops repo URL [default: https://github.com/get-glu/gitops-example]: " repository
+repository="${repository:-https://github.com/get-glu/gitops-example}"
+repository="${repository%.git}"
+
+if kubectl -n glu get secret pipeline 2>&1 >/dev/null; then
+  token="$(kubectl -n glu get secret pipeline -o jsonpath='{.data.github_password}' | base64 -d)"
+else
+  read -s -p "Enter your GitHub personal access token [default: <empty> (read-only pipeline)]: " token
+  echo ""
+  echo "Creating cluster..."
 fi
 
 CONFIGURATION_REPOSITORY_URL="${repository}" \
