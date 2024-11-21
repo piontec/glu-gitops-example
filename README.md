@@ -29,7 +29,7 @@ Before you get started you're going to want to do the following:
 
 1. Fork this repo!
 2. Clone your fork locally.
-3. Make a note of your forks GitHub URL.
+3. Make a note of your forks GitHub URL (likely `https://github.com/{your_username}/gitops-example.git`).
 4. Generate a [GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) (if you want to experiment with promotions).
 
 > You will need at-least read and write contents scope (`contents:write`).
