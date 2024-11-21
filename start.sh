@@ -33,3 +33,9 @@ fi
 
 CONFIGURATION_REPOSITORY_PASSWORD="${token}" \
   timoni bundle apply --kube-context kind-glu-gitops-example -f timoni/flux-aio.cue --runtime-from-env
+
+echo "##########################################"
+echo "#                                        #"
+echo "# Pipeline Ready: http://localhost:30080 #"
+echo "#                                        #"
+echo "##########################################"
