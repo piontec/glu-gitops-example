@@ -31,6 +31,7 @@ if ! command -v timoni 2>&1 >/dev/null; then
   go install github.com/stefanprodan/timoni/cmd/timoni@latest
 fi
 
+CONFIGURATION_REPOSITORY_URL="${repository}" \
 CONFIGURATION_REPOSITORY_PASSWORD="${token}" \
   timoni bundle apply --kube-context kind-glu-gitops-example -f timoni/flux-aio.cue --runtime-from-env
 
