@@ -10,11 +10,9 @@ import (
 	"os"
 
 	"github.com/get-glu/glu"
+	"github.com/get-glu/glu/pkg/builder"
 	"github.com/get-glu/glu/pkg/core"
 	"github.com/get-glu/glu/pkg/fs"
-	"github.com/get-glu/glu/pkg/phases"
-	"github.com/get-glu/glu/pkg/src/git"
-	"github.com/get-glu/glu/pkg/src/oci"
 	"github.com/get-glu/glu/ui"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -31,55 +29,48 @@ func main() {
 }
 
 func run(ctx context.Context) error {
-	return glu.NewSystem(ctx, glu.Name("gitops-example"), glu.WithUI(ui.FS())).
-		AddPipeline(func(ctx context.Context, config *glu.Config) (glu.Pipeline, error) {
-			// fetch the configured OCI repositority source named "checkout"
-			ociRepo, err := config.OCIRepository("app")
-			if err != nil {
-				return nil, err
+	return builder.New[*AppResource](glu.NewSystem(ctx, glu.Name("gitops-example"), glu.WithUI(ui.FS()))).
+		BuildPipeline(glu.Name("gitops-example-app"), func() *AppResource {
+			return &AppResource{
+				Image: "ghcr.io/get-glu/gitops-example/app",
 			}
-
-			ociSource := oci.New[*AppResource](ociRepo)
+		}, func(b builder.PipelineBuilder[*AppResource]) error {
+			// fetch the configured OCI repositority source named "checkout"
+			ociSource, err := builder.OCISource(b, "app")
+			if err != nil {
+				return err
+			}
 
 			// fetch the configured Git repository source named "checkout"
-			gitRepo, gitProposer, err := config.GitRepository(ctx, "gitopsexample")
+			gitSource, err := builder.GitSource(b, "gitopsexample")
 			if err != nil {
-				return nil, err
+				return err
 			}
 
-			gitSource := git.NewSource[*AppResource](gitRepo, gitProposer)
-
-			// create initial (empty) pipeline
-			pipeline := glu.NewPipeline(glu.Name("gitops-example-app"), func() *AppResource {
-				return &AppResource{
-					Image: "ghcr.io/get-glu/gitops-example/app",
-				}
-			})
-
 			// build a phase which sources from the OCI repository
-			ociPhase, err := phases.New(glu.Name("oci"), pipeline, ociSource)
+			ociPhase, err := b.NewPhase(glu.Name("oci"), ociSource)
 			if err != nil {
-				return nil, err
+				return err
 			}
 
 			// build a phase for the staging environment which source from the git repository
 			// configure it to promote from the OCI phase
-			staging, err := phases.New(glu.Name("staging", glu.Label("url", "http://0.0.0.0:30081")),
-				pipeline, gitSource, core.PromotesFrom(ociPhase))
+			staging, err := b.NewPhase(glu.Name("staging", glu.Label("url", "http://0.0.0.0:30081")),
+				gitSource, core.PromotesFrom(ociPhase))
 			if err != nil {
-				return nil, err
+				return err
 			}
 
 			// build a phase for the production environment which source from the git repository
 			// configure it to promote from the staging git phase
-			_, err = phases.New(glu.Name("production", glu.Label("url", "http://0.0.0.0:30082")),
-				pipeline, gitSource, core.PromotesFrom(staging))
+			_, err = b.NewPhase(glu.Name("production", glu.Label("url", "http://0.0.0.0:30082")),
+				gitSource, core.PromotesFrom(staging))
 			if err != nil {
-				return nil, err
+				return err
 			}
 
 			// return configured pipeline to the system
-			return pipeline, nil
+			return nil
 		}).
 		//AddTrigger(
 		//	schedule.New(
@@ -112,8 +103,8 @@ func (c *AppResource) Digest() (string, error) {
 // ReadFromOCIDescriptor is an OCI specific resource requirement.
 // Its purpose is to read the resources state from a target OCI metadata descriptor.
 // Here we're reading out the images digest from the metadata.
-func (c *AppResource) ReadFromOCIDescriptor(d v1.Descriptor) error {
-	c.ImageDigest = d.Digest.String()
+func (r *AppResource) ReadFromOCIDescriptor(d v1.Descriptor) error {
+	r.ImageDigest = d.Digest.String()
 	return nil
 }
 
@@ -123,7 +114,7 @@ func (c *AppResource) ReadFromOCIDescriptor(d v1.Descriptor) error {
 // The function is also provided with metadata for the calling phase.
 // This allows the defining type to adjust behaviour based on the context of the phase.
 // Here we are reading a yaml file from a directory identified by the name of the phase.
-func (c *AppResource) ReadFrom(_ context.Context, meta core.Metadata, fs fs.Filesystem) error {
+func (r *AppResource) ReadFrom(_ context.Context, meta core.Metadata, fs fs.Filesystem) error {
 	deployment, err := readDeployment(fs, fmt.Sprintf("env/%s/deployment.yaml", meta.Name))
 	if err != nil {
 		return err
@@ -140,7 +131,7 @@ func (c *AppResource) ReadFrom(_ context.Context, meta core.Metadata, fs fs.File
 			return err
 		}
 
-		c.ImageDigest = digest.String()
+		r.ImageDigest = digest.String()
 	}
 
 	return nil
@@ -152,7 +143,7 @@ func (c *AppResource) ReadFrom(_ context.Context, meta core.Metadata, fs fs.File
 // The function is also provided with metadata for the calling phase.
 // This allows the defining type to adjust behaviour based on the context of the phase.
 // Here we are writing to a yaml file in a directory identified by the name of the phase.
-func (c *AppResource) WriteTo(ctx context.Context, meta glu.Metadata, fs fs.Filesystem) error {
+func (r *AppResource) WriteTo(ctx context.Context, meta glu.Metadata, fs fs.Filesystem) error {
 	path := fmt.Sprintf("env/%s/deployment.yaml", meta.Name)
 	deployment, err := readDeployment(fs, path)
 	if err != nil {
@@ -160,11 +151,11 @@ func (c *AppResource) WriteTo(ctx context.Context, meta glu.Metadata, fs fs.File
 	}
 
 	if containers := deployment.Spec.Template.Spec.Containers; len(containers) > 0 {
-		containers[0].Image = fmt.Sprintf("%s@%s", c.Image, c.ImageDigest)
+		containers[0].Image = fmt.Sprintf("%s@%s", r.Image, r.ImageDigest)
 
 		for i := range containers[0].Env {
 			if containers[0].Env[i].Name == "APP_IMAGE_DIGEST" {
-				containers[0].Env[i].Value = c.ImageDigest
+				containers[0].Env[i].Value = r.ImageDigest
 			}
 		}
 	}

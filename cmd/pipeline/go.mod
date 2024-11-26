@@ -3,7 +3,7 @@ module get-glu/gitops-example/pipeline
 go 1.23.3
 
 require (
-	github.com/get-glu/glu v0.0.1-prerelease5
+	github.com/get-glu/glu v0.0.1-prerelease5.0.20241126153326-7ff5de8e090f
 	github.com/get-glu/glu/ui v0.0.1-prerelease5
 	github.com/opencontainers/image-spec v1.1.0
 	k8s.io/api v0.31.2
@@ -15,7 +15,7 @@ require (
 require (
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/ProtonMail/go-crypto v1.1.2 // indirect
+	github.com/ProtonMail/go-crypto v1.1.3 // indirect
 	github.com/bradleyfalzon/ghinstallation/v2 v2.12.0 // indirect
 	github.com/cloudflare/circl v1.5.0 // indirect
 	github.com/cyphar/filepath-securejoin v0.3.4 // indirect
