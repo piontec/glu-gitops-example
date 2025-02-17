@@ -1,9 +1,6 @@
-FROM golang:1.23
+FROM ubuntu:24.10
 
-ADD . /src
+COPY cmd/pipeline/pipeline /pipeline
+COPY glu.yaml /glu.yaml
 
-WORKDIR /src
-
-RUN sh -c 'go build -o /bin/pipeline ./cmd/pipeline'
-
-CMD "/bin/pipeline"
+CMD ["/pipeline"]
