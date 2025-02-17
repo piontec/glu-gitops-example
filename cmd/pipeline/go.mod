@@ -1,4 +1,4 @@
-module get-glu/gitops-example/pipeline
+module github.com/piontec/glu-gitops-example/pipeline
 
 go 1.23.3
 

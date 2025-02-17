@@ -8,6 +8,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"time"
 
 	"github.com/get-glu/glu"
 	"github.com/get-glu/glu/pkg/builder"
@@ -15,6 +16,7 @@ import (
 	"github.com/get-glu/glu/pkg/fs"
 	"github.com/get-glu/glu/ui"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
+	"github.com/piontec/glu-gitops-example/pipeline/pkg/cron_schedule"
 	appsv1 "k8s.io/api/apps/v1"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	"oras.land/oras-go/v2/registry"
@@ -72,14 +74,14 @@ func run(ctx context.Context) error {
 			// return configured pipeline to the system
 			return nil
 		}).
-		//AddTrigger(
-		//	schedule.New(
-		//		schedule.WithInterval(10*time.Second),
-		//		schedule.MatchesLabel("env", "staging"),
-		//		// alternatively, the phase instance can be target directly with:
-		//		// glu.ScheduleMatchesPhase(gitStaging),
-		//	),
-		//).
+		AddTrigger(
+			cron_schedule.New(
+				cron_schedule.WithInterval(10 * time.Second),
+			//		schedule.MatchesLabel("env", "staging"),
+			//		// alternatively, the phase instance can be target directly with:
+			//		// glu.ScheduleMatchesPhase(gitStaging),
+			),
+		).
 		Run()
 }
 
