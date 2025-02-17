@@ -11,12 +11,11 @@ import (
 	"time"
 
 	"github.com/get-glu/glu"
-	"github.com/get-glu/glu/pkg/builder"
-	"github.com/get-glu/glu/pkg/core"
 	"github.com/get-glu/glu/pkg/fs"
+	"github.com/get-glu/glu/pkg/pipelines"
+	"github.com/get-glu/glu/pkg/triggers/schedule"
 	"github.com/get-glu/glu/ui"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
-	"github.com/piontec/glu-gitops-example/pipeline/pkg/cron_schedule"
 	appsv1 "k8s.io/api/apps/v1"
 	k8syaml "k8s.io/apimachinery/pkg/util/yaml"
 	"oras.land/oras-go/v2/registry"
@@ -31,58 +30,77 @@ func main() {
 }
 
 func run(ctx context.Context) error {
-	return builder.New[*AppResource](glu.NewSystem(ctx, glu.Name("gitops-example"), glu.WithUI(ui.FS()))).
-		BuildPipeline(glu.Name("gitops-example-app"), func() *AppResource {
-			return &AppResource{
-				Image: "ghcr.io/get-glu/gitops-example/app",
-			}
-		}, func(b builder.PipelineBuilder[*AppResource]) error {
-			// fetch the configured OCI repositority source named "checkout"
-			ociSource, err := builder.OCISource(b, "app")
-			if err != nil {
-				return err
-			}
+	system := glu.NewSystem(ctx, glu.Name("gitops-example"), glu.WithUI(ui.FS()))
+	if err := pipelines.NewBuilder(system, glu.Name("gitops-example-app"), func() *AppResource {
+		return &AppResource{
+			Image: "ghcr.io/get-glu/gitops-example/app",
+		}
+	}).
+		// LogsTo(pipelines.FileLogger[*CheckoutResource]("history")).
+		NewPhase(pipelines.OCIPhase[*AppResource](glu.Name("oci"), "app")).
+		PromotesTo(pipelines.GitPhase[*AppResource](
+			glu.Name("staging", glu.Label("url", "http://0.0.0.0:30081")),
+			"gitopsexample",
+		), schedule.New(schedule.WithInterval(30*time.Second))).
+		PromotesTo(pipelines.GitPhase[*AppResource](
+			glu.Name("production", glu.Label("url", "http://0.0.0.0:30082")),
+			"gitopsexample",
+		)).
+		Build(); err != nil {
+		return err
+	}
 
-			// fetch the configured Git repository source named "checkout"
-			gitSource, err := builder.GitSource(b, "gitopsexample")
-			if err != nil {
-				return err
-			}
+	return system.Run()
+	/*
+		builder.
+			func(b builder.PipelineBuilder[*AppResource]) error {
+				// fetch the configured OCI repositority source named "checkout"
+				ociSource, err := builder.OCISource(b, "app")
+				if err != nil {
+					return err
+				}
 
-			// build a phase which sources from the OCI repository
-			ociPhase, err := b.NewPhase(glu.Name("oci"), ociSource)
-			if err != nil {
-				return err
-			}
+				// fetch the configured Git repository source named "checkout"
+				gitSource, err := builder.GitSource(b, "gitopsexample")
+				if err != nil {
+					return err
+				}
 
-			// build a phase for the staging environment which source from the git repository
-			// configure it to promote from the OCI phase
-			staging, err := b.NewPhase(glu.Name("staging", glu.Label("url", "http://0.0.0.0:30081")),
-				gitSource, core.PromotesFrom(ociPhase))
-			if err != nil {
-				return err
-			}
+				// build a phase which sources from the OCI repository
+				ociPhase, err := b.NewPhase(glu.Name("oci"), ociSource)
+				if err != nil {
+					return err
+				}
 
-			// build a phase for the production environment which source from the git repository
-			// configure it to promote from the staging git phase
-			_, err = b.NewPhase(glu.Name("production", glu.Label("url", "http://0.0.0.0:30082")),
-				gitSource, core.PromotesFrom(staging))
-			if err != nil {
-				return err
-			}
+				// build a phase for the staging environment which source from the git repository
+				// configure it to promote from the OCI phase
+				staging, err := b.NewPhase(glu.Name("staging", glu.Label("url", "http://0.0.0.0:30081")),
+					gitSource, core.PromotesFrom(ociPhase))
+				if err != nil {
+					return err
+				}
 
-			// return configured pipeline to the system
-			return nil
-		}).
-		AddTrigger(
-			cron_schedule.New(
-				cron_schedule.WithInterval(10 * time.Second),
+				// build a phase for the production environment which source from the git repository
+				// configure it to promote from the staging git phase
+				_, err = b.NewPhase(glu.Name("production", glu.Label("url", "http://0.0.0.0:30082")),
+					gitSource, core.PromotesFrom(staging))
+				if err != nil {
+					return err
+				}
+
+				// return configured pipeline to the system
+				return nil
+			}
+			// AddTrigger(
+			// cron_schedule.New(
+			// cron_schedule.WithInterval(10 * time.Second),
 			//		schedule.MatchesLabel("env", "staging"),
 			//		// alternatively, the phase instance can be target directly with:
 			//		// glu.ScheduleMatchesPhase(gitStaging),
-			),
-		).
-		Run()
+			// ),
+			// ).
+			return nil
+	*/
 }
 
 // AppResource is a custom envelope for carrying our specific repository configuration
@@ -116,8 +134,8 @@ func (r *AppResource) ReadFromOCIDescriptor(d v1.Descriptor) error {
 // The function is also provided with metadata for the calling phase.
 // This allows the defining type to adjust behaviour based on the context of the phase.
 // Here we are reading a yaml file from a directory identified by the name of the phase.
-func (r *AppResource) ReadFrom(_ context.Context, meta core.Metadata, fs fs.Filesystem) error {
-	deployment, err := readDeployment(fs, fmt.Sprintf("env/%s/deployment.yaml", meta.Name))
+func (r *AppResource) ReadFrom(_ context.Context, phase glu.Descriptor, fs fs.Filesystem) error {
+	deployment, err := readDeployment(fs, fmt.Sprintf("env/%s/deployment.yaml", phase.Metadata.Name))
 	if err != nil {
 		return err
 	}
@@ -145,8 +163,8 @@ func (r *AppResource) ReadFrom(_ context.Context, meta core.Metadata, fs fs.File
 // The function is also provided with metadata for the calling phase.
 // This allows the defining type to adjust behaviour based on the context of the phase.
 // Here we are writing to a yaml file in a directory identified by the name of the phase.
-func (r *AppResource) WriteTo(ctx context.Context, meta glu.Metadata, fs fs.Filesystem) error {
-	path := fmt.Sprintf("env/%s/deployment.yaml", meta.Name)
+func (r *AppResource) WriteTo(ctx context.Context, phase glu.Descriptor, fs fs.Filesystem) error {
+	path := fmt.Sprintf("env/%s/deployment.yaml", phase.Metadata.Name)
 	deployment, err := readDeployment(fs, path)
 	if err != nil {
 		return err
