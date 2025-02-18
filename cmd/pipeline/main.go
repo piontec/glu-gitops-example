@@ -8,7 +8,6 @@ import (
 	"io"
 	"log/slog"
 	"os"
-	"time"
 
 	"github.com/get-glu/glu"
 	"github.com/get-glu/glu/pkg/fs"
@@ -40,7 +39,8 @@ func run(ctx context.Context) error {
 		PromotesTo(pipelines.GitPhase[*AppResource](
 			glu.Name("staging", glu.Label("url", "http://0.0.0.0:30081")),
 			"gitopsexample",
-		), NewCronScheduler(WithInterval(10*time.Second))).
+		)).
+		// ), NewCronScheduler(WithInterval(10*time.Second))).
 		// ), schedule.New(schedule.WithInterval(30*time.Second))).
 		PromotesTo(pipelines.GitPhase[*AppResource](
 			glu.Name("production", glu.Label("url", "http://0.0.0.0:30082")),
@@ -51,56 +51,6 @@ func run(ctx context.Context) error {
 	}
 
 	return system.Run()
-	/*
-		builder.
-			func(b builder.PipelineBuilder[*AppResource]) error {
-				// fetch the configured OCI repositority source named "checkout"
-				ociSource, err := builder.OCISource(b, "app")
-				if err != nil {
-					return err
-				}
-
-				// fetch the configured Git repository source named "checkout"
-				gitSource, err := builder.GitSource(b, "gitopsexample")
-				if err != nil {
-					return err
-				}
-
-				// build a phase which sources from the OCI repository
-				ociPhase, err := b.NewPhase(glu.Name("oci"), ociSource)
-				if err != nil {
-					return err
-				}
-
-				// build a phase for the staging environment which source from the git repository
-				// configure it to promote from the OCI phase
-				staging, err := b.NewPhase(glu.Name("staging", glu.Label("url", "http://0.0.0.0:30081")),
-					gitSource, core.PromotesFrom(ociPhase))
-				if err != nil {
-					return err
-				}
-
-				// build a phase for the production environment which source from the git repository
-				// configure it to promote from the staging git phase
-				_, err = b.NewPhase(glu.Name("production", glu.Label("url", "http://0.0.0.0:30082")),
-					gitSource, core.PromotesFrom(staging))
-				if err != nil {
-					return err
-				}
-
-				// return configured pipeline to the system
-				return nil
-			}
-			// AddTrigger(
-			// cron_schedule.New(
-			// cron_schedule.WithInterval(10 * time.Second),
-			//		schedule.MatchesLabel("env", "staging"),
-			//		// alternatively, the phase instance can be target directly with:
-			//		// glu.ScheduleMatchesPhase(gitStaging),
-			// ),
-			// ).
-			return nil
-	*/
 }
 
 // AppResource is a custom envelope for carrying our specific repository configuration
