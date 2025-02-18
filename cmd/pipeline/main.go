@@ -13,7 +13,6 @@ import (
 	"github.com/get-glu/glu"
 	"github.com/get-glu/glu/pkg/fs"
 	"github.com/get-glu/glu/pkg/pipelines"
-	"github.com/get-glu/glu/pkg/triggers/schedule"
 	"github.com/get-glu/glu/ui"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	appsv1 "k8s.io/api/apps/v1"
@@ -23,6 +22,7 @@ import (
 )
 
 func main() {
+	slog.Info("starting system")
 	if err := run(context.Background()); err != nil && !errors.Is(err, context.Canceled) {
 		slog.Error("system exiting", "error", err)
 		os.Exit(1)
@@ -36,12 +36,12 @@ func run(ctx context.Context) error {
 			Image: "ghcr.io/get-glu/gitops-example/app",
 		}
 	}).
-		// LogsTo(pipelines.FileLogger[*CheckoutResource]("history")).
 		NewPhase(pipelines.OCIPhase[*AppResource](glu.Name("oci"), "app")).
 		PromotesTo(pipelines.GitPhase[*AppResource](
 			glu.Name("staging", glu.Label("url", "http://0.0.0.0:30081")),
 			"gitopsexample",
-		), schedule.New(schedule.WithInterval(30*time.Second))).
+		), NewCronScheduler(WithInterval(10*time.Second))).
+		// ), schedule.New(schedule.WithInterval(30*time.Second))).
 		PromotesTo(pipelines.GitPhase[*AppResource](
 			glu.Name("production", glu.Label("url", "http://0.0.0.0:30082")),
 			"gitopsexample",

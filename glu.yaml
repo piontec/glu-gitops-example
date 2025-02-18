@@ -3,7 +3,7 @@ sources:
     gitopsexample:
       remote:
         name: origin
-        url: "https://github.com/get-glu/gitops-example.git"
+        url: "https://github.com/piontec/glu-gitops-example.git"
         credential: github
   oci:
     app:
