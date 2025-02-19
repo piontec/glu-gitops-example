@@ -1,5 +1,9 @@
-Glu GitOps Example Pipeline
----------------------------
+## Glu GitOps Example Pipeline
+
+## How to run local pipeline demo
+
+- run `start.sh`, it will fail as local image doesn't exist yet
+- run `build_pipeline.sh` to build the local code and upload to kind (it also restarts the pipeline deployment)
 
 This repository is a demonstration of a GitOps pipeline held together with Glu.
 

@@ -8,7 +8,7 @@ package main
 // Defaults
 values: {
 	image: {
-		repository: "ghcr.io/get-glu/gitops-example/pipeline"
+		repository: "docker.io/local/glu-pipeline:latest"
 		digest:     ""
 		tag:        "latest"
 	}
